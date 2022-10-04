@@ -10,11 +10,9 @@ import com.archiiro.app.Core.Repository.RoleUserRepository;
 import com.archiiro.app.Core.Repository.UserRepository;
 import com.archiiro.app.Core.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -47,6 +45,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public List<UserDto> getAllDto() {
         // get All
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = "Unknown User";
+        if(authentication != null) {
+            currentUsername = authentication.getName();
+        }
+        System.out.println(currentUsername);
         return this.userRepos.getAllDto();
     }
 
@@ -56,8 +60,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if(userDto == null) {
             System.out.println("User not found");
             throw new UsernameNotFoundException("User not found");
-        } else {
-            System.out.println("User is: " + username);
         }
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
         if(userDto.getRoles() != null && userDto.getRoles().size() > 0) {
@@ -89,6 +91,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDto updateDto(Long id, UserDto dto) {
         User entity = null;
         LocalDateTime dateCreate = LocalDateTime.now();
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        User modifiedUser = null;
+//        String currentUsername = "Unknown User";
+//        if(authentication != null) {
+//            modifiedUser = (User) authentication.getPrincipal();
+//            currentUsername = modifiedUser.getUsername();
+//        }
+//        System.out.println(currentUsername);
         if(id != null) {
             Optional<User> userOptional = this.userRepos.findById(id);
             if(userOptional.isPresent()) {
